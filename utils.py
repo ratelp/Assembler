@@ -102,7 +102,7 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
     # Para cada palavra em arquivoPalavras irá guardar na lista, retirando os caracteres ',' e '$'
     listaLimpa = [i.replace(',', '').replace('$', '') for i in listaPalavra]
 
-
+    instrucoes = {}
     for index, palavra in enumerate(listaLimpa):
         bits = ''
         try:
@@ -113,15 +113,16 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
                 # Quando utilizado binario(regs[listaLimpa[index + x]],y) -> Quantidade dependerá do número ou do registrador x index a frente do atual e tera o tamanho de y bits
                 
                 case ('sll' | 'srl'):
-                    bits = instrucoes[palavra][1] + instrucoes[palavra][2] + binario(regs[listaLimpa[index + 2]],5) + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 3]],5) + instrucoes[palavra][6]
+                    bits = formato_instrucoes[palavra][1] + formato_instrucoes[palavra][2] + binario(regs[listaLimpa[index + 2]],5) + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 3]],5) + formato_instrucoes[palavra][6]
+
                 case ('jr'):
-                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5) + instrucoes[palavra][3] + instrucoes[palavra][4] + instrucoes[palavra][5] + instrucoes[palavra][6] 
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5) + formato_instrucoes[palavra][3] + formato_instrucoes[palavra][4] + formato_instrucoes[palavra][5] + formato_instrucoes[palavra][6] 
                 case ('mfhi' | 'mflo' ):
-                    bits = instrucoes[palavra][1] + instrucoes[palavra][2]  + instrucoes[palavra][3] + binario(regs[listaLimpa[index + 1]],5) + instrucoes[palavra][5] + instrucoes[palavra][6]
+                    bits = formato_instrucoes[palavra][1] + formato_instrucoes[palavra][2]  + formato_instrucoes[palavra][3] + binario(regs[listaLimpa[index + 1]],5) + formato_instrucoes[palavra][5] + formato_instrucoes[palavra][6]
                 case ('mult' | 'multu' | 'div' | 'divu'):
-                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + instrucoes[palavra][4] + instrucoes[palavra][5] + instrucoes[palavra][6]
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + formato_instrucoes[palavra][4] + formato_instrucoes[palavra][5] + formato_instrucoes[palavra][6]
                 case ('add' | 'addu' | 'sub' | 'subu' | 'and' | 'or' | 'slt' | 'sltu' | 'mul'):
-                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 3]],5) + binario(regs[listaLimpa[index + 1]],5) + instrucoes[palavra][5] + instrucoes[palavra][6]
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 3]],5) + binario(regs[listaLimpa[index + 1]],5) + formato_instrucoes[palavra][5] + formato_instrucoes[palavra][6]
                 # Para o FORMATO R ------------------------------------------------------------------------------------------
 
                 # Para o FORMATO I ------------------------------------------------------------------------------------------
@@ -135,18 +136,21 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
                     # selecionando linha em que está a label
                     while listaLimpa[index + 3] != posicaoLabels[i]['label']:
                         i += 1
-                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[indexLabelI] + 1)),16)
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[indexLabelI] + 1)),16)
                     # Atualizando index
                     indexLabelI += 1
 
                 case('addi' | 'addiu' | 'slti' | 'sltiu' | 'sltiu' | 'andi' | 'ori'):
-                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 3]],16)
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 3]],16)
+
                 case('lui'):
-                    bits = instrucoes[palavra][1] + instrucoes[palavra][2]  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2]],16)
+                    bits = formato_instrucoes[palavra][1] + formato_instrucoes[palavra][2]  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2]],16)
+
+
                 case ('lw' | 'sw'):
                     # listaLimpa[index + 2].split('(')[0] o split é para separar o 4(9) ficando 4 e 9) para poder utilizar cada
                     # um de forma separada
-                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2].split('(')[1][0]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2].split('(')[0]],16)
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2].split('(')[1][0]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2].split('(')[0]],16)
                 # Para o FORMATO I ------------------------------------------------------------------------------------------
 
 
@@ -161,17 +165,26 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
                     
                     valorDiv4 = posicaoLabels[i]['endereco'] >> 2
                     
-                    bits = instrucoes[palavra][1] + binario(valorDiv4,26)
+                    bits = formato_instrucoes[palavra][1] + binario(valorDiv4,26)
                 # Para o FORMATO J ------------------------------------------------------------------------------------------   
+            
+            if palavra in formato_instrucoes.keys():
+                if palavra in instrucoes:
+                    instrucoes[palavra] += 1
+                else:
+                    instrucoes[palavra] = 1
+            
             if bits:
                 if hexa:
                     bits = hex(int(bits,2))[2:]
                 arquivoEscrita.write(bits + '\n')
-        
+
         except KeyError:
             continue
         
     arquivoEscrita.close()
+
+    return instrucoes
 
 # Dicionário de Registradores
 regs = {
@@ -211,7 +224,7 @@ regs = {
 
 # Dicionário de Instruções
 
-instrucoes = {
+formato_instrucoes = {
     'sll'   : ['R','000000','00000','','','','000000'],
     'srl'   : ['R','000000','00000','','','','000010'],
     'jr'    : ['R','000000','','00000','00000','00000','001000'],

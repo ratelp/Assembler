@@ -18,9 +18,22 @@ if len(listArg) > 1:
 # Verifica se foi repassado parâmetro e encaminha para determinada opção escolhida
 if parametro != 0:
     if parametro == "-b":
-        tradutor(nomeArquivo,posicaoLabels, False)
+        instrucoes = tradutor(nomeArquivo,posicaoLabels, False)
+        print('Quantidades por tipo de instruções:')
+        for i, qt in instrucoes.items():
+            print(f'{i}: {qt}')
+
+        print(f'CPI Médio: 1')
+
     elif parametro == "-h":
-        tradutor(nomeArquivo,posicaoLabels, True)
+        instrucoes = tradutor(nomeArquivo,posicaoLabels, True)
+        print('Quantidades por tipo de instruções:')
+        for i, qt in instrucoes.items():
+            print(f'{i}: {qt}')
+
+        print() # Pular linha
+        print(f'CPI Médio: 1')
+
     else:
         print("Parâmetro inválido")
 
