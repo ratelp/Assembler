@@ -1,5 +1,6 @@
 
 from utils import tradutor, localizadorDeLabels
+from cpi import CalculadoraCPI
 import sys 
 
 listArg = sys.argv # Coleta os argumentos
@@ -15,24 +16,30 @@ if len(listArg) > 1:
     posicaoLabels = localizadorDeLabels(nomeArquivo, enderecoInicial) # Localiza Labels e guarda as informações na lista
 
 
+calculadora_cpi = CalculadoraCPI('ciclos.csv') # Inicializa calculadora de CPI
+
 # Verifica se foi repassado parâmetro e encaminha para determinada opção escolhida
 if parametro != 0:
     if parametro == "-b":
         instrucoes = tradutor(nomeArquivo,posicaoLabels, False)
-        print('Quantidades por tipo de instruções:')
-        for i, qt in instrucoes.items():
-            print(f'{i}: {qt}')
 
-        print(f'CPI Médio: 1')
+        if instrucoes:     
+            print('Quantidades por tipo de instruções:')
+            for i, qt in instrucoes.items():
+                print(f'{i}: {qt}')
+
+            print()
+            print(f'CPI Médio: {calculadora_cpi.calcular(instrucoes)}')
 
     elif parametro == "-h":
         instrucoes = tradutor(nomeArquivo,posicaoLabels, True)
-        print('Quantidades por tipo de instruções:')
-        for i, qt in instrucoes.items():
-            print(f'{i}: {qt}')
+        if instrucoes:
+            print('Quantidades por tipo de instruções:')
+            for i, qt in instrucoes.items():
+                print(f'{i}: {qt}')
 
-        print() # Pular linha
-        print(f'CPI Médio: 1')
+            print() # Pular linha
+            print(f'CPI Médio: {calculadora_cpi.calcular(instrucoes)}')
 
     else:
         print("Parâmetro inválido")
