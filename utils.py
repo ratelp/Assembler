@@ -109,7 +109,7 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
             match palavra:
                 
                 # Para o FORMATO R ------------------------------------------------------------------------------------------
-                # Quando utlizado instrucoes[palavra][x] -> Quantidade de bits padrão para determinada instrução
+                # Quando utlizado formato_instrucoes[palavra][x] -> Quantidade de bits padrão para determinada instrução
                 # Quando utilizado binario(regs[listaLimpa[index + x]],y) -> Quantidade dependerá do número ou do registrador x index a frente do atual e tera o tamanho de y bits
                 
                 case ('sll' | 'srl'):
@@ -126,7 +126,7 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
                 # Para o FORMATO R ------------------------------------------------------------------------------------------
 
                 # Para o FORMATO I ------------------------------------------------------------------------------------------
-                # Quando utlizado instrucoes[palavra][x] -> Quantidade de bits padrão para determinada instrução
+                # Quando utlizado formato_instrucoes[palavra][x] -> Quantidade de bits padrão para determinada instrução
                 # Quando utilizado binario(regs[listaLimpa[index + x]],y) -> Quantidade dependerá do número ou do registrador x index a frente do atual e tera o tamanho de y bits
                 # Para beq e bne foi feito uma função com entitulação 'localizaLinhaInstrucao', com intuito de localizar linha
                 # onde está a instrução e assim poder calcular a diferença da posição atual para posição da label
