@@ -1,5 +1,5 @@
 
-from utils import tradutorBinario, localizadorDeLabels
+from utils import tradutor, localizadorDeLabels
 import sys 
 
 listArg = sys.argv # Coleta os argumentos
@@ -12,15 +12,15 @@ if len(listArg) > 1:
     nomeArquivo = listArg[1] # Coleta o nome do arquivo a ser lido 
     parametro = listArg[2] # Coleta o parâmetro para ser utilizado
 
-    posicaoLabels = localizadorDeLabels(nomeArquivo) # Localiza Labels e guarda as informações na lista
+    posicaoLabels = localizadorDeLabels(nomeArquivo, enderecoInicial) # Localiza Labels e guarda as informações na lista
 
 
 # Verifica se foi repassado parâmetro e encaminha para determinada opção escolhida
 if parametro != 0:
     if parametro == "-b":
-        tradutorBinario(nomeArquivo,posicaoLabels)
+        tradutor(nomeArquivo,posicaoLabels, False)
     elif parametro == "-h":
-        print("-h")
+        tradutor(nomeArquivo,posicaoLabels, True)
     else:
         print("Parâmetro inválido")
 
