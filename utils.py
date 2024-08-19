@@ -20,14 +20,18 @@ def localizadorDeLabels(nomeArquivo):
     
     # Acessa arquivo e separa linhas
     arquivo = open(nomeArquivo)
-    arquivoPalavras = arquivo.read().split('\n')
+    arquivoLinhas = arquivo.read().split('\n')
+    arquivo.close()
+
+    # Irá retirar os caracteres '#' e o que vier após eles de cada linha do arquivo
+    listaLinhas = [linha.split('#')[0].strip() for linha in arquivoLinhas]
 
     # Inicializa lista e contador
     linhaLabel = []
     contador = 0
 
     # Verifica em cada linha os caracteres, ao localizar ':' guarda o valor da linha
-    for linha in arquivoPalavras:
+    for linha in listaLinhas:
         contador += 1
         for caractere in linha:
             if caractere == ':':
@@ -37,12 +41,143 @@ def localizadorDeLabels(nomeArquivo):
                     'numLinha' : contador,
                     'endereco' : 0x00400000 + (contador-1)*4
                 })    
-
+    
     return linhaLabel
+
+# Função para localizar linha de uma determinada instrução
+def localizaLinhaInstrucao(nomeArquivo, instrucao): 
+ 
+   # Acessa arquivo e separa linhas
+   arquivo = open(nomeArquivo)
+   arquivoLinhas = arquivo.read().split('\n')
+   arquivo.close()
+
+   # Irá retirar os caracteres '#' e o que vier após eles de cada linha do arquivo
+   listaLinhas = [linha.split('#')[0].strip() for linha in arquivoLinhas]
+
+   # Lista onde ficará o resultado se possui ou não a instução na linha determinada
+   listaValidadora = []
+
+   for i in range(len(listaLinhas)):
+      if listaLinhas[i].find(instrucao) != -1:
+         listaValidadora.append(1)
+      else:
+         listaValidadora.append(0)
+
+   # Guarda número da linha de todas as instruções solicitadas
+   listaRetorno = []
+
+   for i in range(len(listaValidadora)):
+      if listaValidadora[i] == 1:
+         listaRetorno.append(i+1)
+
+   return listaRetorno
+    
+def tradutorBinario(nomeArquivo, posicaoLabels):
+
+    # Index para se utilizar na manipulação do endereço do formato i
+    indexLabelI = 0
+
+    # Coleta cada linha do arquivo enviado separando pelas linhas em uma lista
+    arquivo = open(nomeArquivo)
+    arquivoLinhas = arquivo.read().split('\n')
+    arquivo.close()
+
+    # Irá retirar os caracteres '#' e o que vier após eles de cada linha do arquivo
+    listaLinhas = [linha.split('#')[0].strip() for linha in arquivoLinhas]
+
+    # Irá separar cada palavra de cada linha em uma lista
+    listaPalavra = [palavra for linha in listaLinhas for palavra in linha.split()]
+
+    # Gerando nome do novo arquivo
+    nomeNovoArquivo = nomeArquivo.split('.')[0] + '.bin'
+    
+    # Abre arquivo para escrição
+    arquivoEscrita = open(nomeNovoArquivo, 'w')
+
+    # Para cada palavra em arquivoPalavras irá guardar na lista, retirando os caracteres ',' e '$'
+    listaLimpa = [i.replace(',', '').replace('$', '') for i in listaPalavra]
+
+
+    for index, palavra in enumerate(listaLimpa):
+        try:
+            match palavra:
+                
+                # Para o FORMATO R ------------------------------------------------------------------------------------------
+                # Quando utlizado instrucoes[palavra][x] -> Quantidade de bits padrão para determinada instrução
+                # Quando utilizado binario(regs[listaLimpa[index + x]],y) -> Quantidade dependerá do número ou do registrador x index a frente do atual e tera o tamanho de y bits
+                # \n para a próxima instrução ficar na próxima linha
+                
+                case ('sll' | 'srl'):
+                    bits = instrucoes[palavra][1] + instrucoes[palavra][2] + binario(regs[listaLimpa[index + 2]],5) + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 3]],5) + instrucoes[palavra][6] + '\n'
+                    arquivoEscrita.write(bits)
+                case ('jr'):
+                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5) + instrucoes[palavra][3] + instrucoes[palavra][4] + instrucoes[palavra][5] + instrucoes[palavra][6] + '\n'
+                    arquivoEscrita.write(bits) 
+                case ('mfhi' | 'mflo' ):
+                    bits = instrucoes[palavra][1] + instrucoes[palavra][2]  + instrucoes[palavra][3] + binario(regs[listaLimpa[index + 1]],5) + instrucoes[palavra][5] + instrucoes[palavra][6] + '\n'
+                    arquivoEscrita.write(bits)
+                case ('mult' | 'multu' | 'div' | 'divu'):
+                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + instrucoes[palavra][4] + instrucoes[palavra][5] + instrucoes[palavra][6] + '\n'
+                    arquivoEscrita.write(bits)
+                case ('add' | 'addu' | 'sub' | 'subu' | 'and' | 'or' | 'slt' | 'sltu' | 'mul'):
+                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 3]],5) + binario(regs[listaLimpa[index + 1]],5) + instrucoes[palavra][5] + instrucoes[palavra][6] + '\n'
+                    arquivoEscrita.write(bits)
+                # Para o FORMATO R ------------------------------------------------------------------------------------------
+
+                # Para o FORMATO I ------------------------------------------------------------------------------------------
+                # Quando utlizado instrucoes[palavra][x] -> Quantidade de bits padrão para determinada instrução
+                # Quando utilizado binario(regs[listaLimpa[index + x]],y) -> Quantidade dependerá do número ou do registrador x index a frente do atual e tera o tamanho de y bits
+                # Para beq e bne foi feito uma função com entitulação 'localizaLinhaInstrucao', com intuito de localizar linha
+                # onde está a instrução e assim poder calcular a diferença da posição atual para posição da label
+                # \n para a próxima instrução ficar na próxima linha
+
+                case('beq' | 'bne'):
+                    i = 0 
+                    # selecionando linha em que está a label
+                    while listaLimpa[index + 3] != posicaoLabels[i]['label']:
+                        i += 1
+                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[indexLabelI] + 1)),16) + '\n'
+                    # Atualizando index
+                    indexLabelI += 1
+
+                    arquivoEscrita.write(bits)
+                case('addi' | 'addiu' | 'slti' | 'sltiu' | 'sltiu' | 'andi' | 'ori'):
+                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 3]],16) + '\n'
+                    arquivoEscrita.write(bits)
+                case('lui'):
+                    bits = instrucoes[palavra][1] + instrucoes[palavra][2]  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2]],16) + '\n'
+                    arquivoEscrita.write(bits)
+                case ('lw' | 'sw'):
+                    # listaLimpa[index + 2].split('(')[0] o split é para separar o 4(9) ficando 4 e 9) para poder utilizar cada
+                    # um de forma separada
+                    bits = instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2].split('(')[1][0]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2].split('(')[0]],16) + '\n'
+                    arquivoEscrita.write(bits)
+                # Para o FORMATO I ------------------------------------------------------------------------------------------
+
+
+                # Para o FORMATO J ------------------------------------------------------------------------------------------
+                # Utiliza do endereço na posicao do label
+                case('j' | 'jal'):
+
+                    i = 0 
+                    # selecionando linha em que está a label
+                    while listaLimpa[index + 1] != posicaoLabels[i]['label']:
+                        i += 1
+                    
+                    valorDiv4 = posicaoLabels[i]['endereco'] >> 2
+                    
+                    bits = instrucoes[palavra][1] + binario(valorDiv4,26) + '\n'
+                    arquivoEscrita.write(bits)
+                # Para o FORMATO J ------------------------------------------------------------------------------------------   
+        except KeyError:
+            continue
+        
+    arquivoEscrita.close()
 
 # Dicionário de Registradores
 regs = {
-    'ze' : 0,  '0'  :  0,
+    'zero' : 0,  '0'  :  0,
     'at' : 1,  '1'  :  1,
     'v0' : 2,  '2'  :  2,
     'v1' : 3,  '3'  :  3,
@@ -111,5 +246,5 @@ instrucoes = {
     'sw'    : ['I','101100','','',''],
 
     'j'     : ['J','000010',''],
-    'jal'   : ['J','000011',''],
+    'jal'   : ['J','000011','']
 }
