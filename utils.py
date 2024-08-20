@@ -179,7 +179,7 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
             
             if bits:
                 if hexa:
-                    bits = hex(int(bits,2))[2:]
+                    bits = hex(int(bits,2))[2:].zfill(8)
                 arquivoEscrita.write(bits + '\n')
 
         except KeyError:
