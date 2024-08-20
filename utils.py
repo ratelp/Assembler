@@ -26,6 +26,9 @@ def localizadorDeLabels(nomeArquivo, endereco):
     # Irá retirar os caracteres '#' e o que vier após eles de cada linha do arquivo
     listaLinhas = [linha.split('#')[0].strip() for linha in arquivoLinhas]
 
+    # Retirando linhas vazias
+    listaLinhas = [linha for linha in listaLinhas if linha]
+
     # Inicializa lista e contador
     linhaLabel = []
     contador = 0
@@ -40,8 +43,10 @@ def localizadorDeLabels(nomeArquivo, endereco):
                     'label' : linha.split(':')[0],
                     'numLinha' : contador,
                     'endereco' : endereco + (contador-1)*4
-                })    
-    
+                })
+                # Caso não tenha instruções na linha da label, irá subtrair 1 para que a linha não seja contada em futuros labels e para que label atual aponte para próxima instrução
+                if not any(inst in linha for inst in formato_instrucoes):
+                    contador -= 1  
     return linhaLabel
 
 # Função para localizar linha de uma determinada instrução
@@ -55,7 +60,10 @@ def localizaLinhaInstrucao(nomeArquivo, instrucao):
    # Irá retirar os caracteres '#' e o que vier após eles de cada linha do arquivo
    listaLinhas = [linha.split('#')[0].strip() for linha in arquivoLinhas]
 
-   # Lista onde ficará o resultado se possui ou não a instução na linha determinada
+   # Verifica se em alguma das linhas, possui alguma que não possui nenhuma instrução
+   listaLinhas = [linha for linha in listaLinhas if any(inst in linha for inst in formato_instrucoes)]
+
+   # Lista onde ficará o resultado se possui ou não a instrução na linha determinada
    listaValidadora = []
 
    for i in range(len(listaLinhas)):

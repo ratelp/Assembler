@@ -14,8 +14,7 @@ if len(listArg) > 1:
     parametro = listArg[2] # Coleta o parâmetro para ser utilizado
 
     posicaoLabels = localizadorDeLabels(nomeArquivo, enderecoInicial) # Localiza Labels e guarda as informações na lista
-
-
+    
 calculadora_cpi = CalculadoraCPI('ciclos.csv') # Inicializa calculadora de CPI
 
 # Verifica se foi repassado parâmetro e encaminha para determinada opção escolhida
