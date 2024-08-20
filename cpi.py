@@ -1,4 +1,4 @@
-import pandas as pd
+from csv import DictReader
 
 class CalculadoraCPI:
     """
@@ -9,8 +9,10 @@ class CalculadoraCPI:
     def __init__(self, filename):
         # Lê arquivo fornecido e salva informações em 'valores'
         # Formato de 'valores': {'instrucao': qt_ciclos}
-        for v in pd.read_csv(filename).values:
-            self.valores[v[0]] = v[1]
+        with open(filename, 'r') as file:
+            reader = DictReader(file)
+            for row in reader:
+                self.valores[row['Instrucao']] = int(row['Ciclos'])
     
     def calcular(self, instrucoes):
         """
