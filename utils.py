@@ -90,7 +90,10 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
     listaPalavra = [palavra for linha in listaLinhas for palavra in linha.split()]
 
     # Gerando nome do novo arquivo
-    nomeNovoArquivo = nomeArquivo.split('.')[0] + '.bin'
+    if hexa:
+        nomeNovoArquivo = nomeArquivo.split('.')[0] + '.hex'
+    else:
+        nomeNovoArquivo = nomeArquivo.split('.')[0] + '.bin'
     
     # Abre arquivo para escrição
     arquivoEscrita = open(nomeNovoArquivo, 'w')
