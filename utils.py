@@ -111,7 +111,7 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
         arquivoEscrita.write('v2.0 raw' + '\n')
 
     # Para cada palavra em arquivoPalavras irá guardar na lista, retirando os caracteres ',' e '$'
-    listaLimpa = [i.replace(',', '').replace('$', '') for i in listaPalavra]
+    listaLimpa = [i.replace(',', '').replace('$', '').replace('(','') for i in listaPalavra]
 
     instrucoes = {}
     for index, palavra in enumerate(listaLimpa):
@@ -151,17 +151,17 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
                     # Atualizando index
                     indexLabelI += 1
 
-                case('addi' | 'addiu' | 'slti' | 'sltiu' | 'sltiu' | 'andi' | 'ori'):
-                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 3]],16)
+                case('addi' | 'addiu' | 'slti' | 'sltiu' | 'andi' | 'ori'):
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(int(listaLimpa[index + 3]),16)
+                    
 
                 case('lui'):
-                    bits = formato_instrucoes[palavra][1] + formato_instrucoes[palavra][2]  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2]],16)
+                    bits = formato_instrucoes[palavra][1] + formato_instrucoes[palavra][2]  + binario(regs[listaLimpa[index + 1]],5) + binario(int(listaLimpa[index + 2]),16)
 
 
                 case ('lw' | 'sw'):
-                    # listaLimpa[index + 2].split('(')[0] o split é para separar o 4(9) ficando 4 e 9) para poder utilizar cada
-                    # um de forma separada
-                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2].split('(')[1][0]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(regs[listaLimpa[index + 2].split('(')[0]],16)
+                    # listaLimpa[index + 3].split(')')[0] o split é para separar o 9) ficando 9 e ) para poder utilizar forma separada
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 3].split(')')[0]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(int(listaLimpa[index + 2]),16)
                 # Para o FORMATO I ------------------------------------------------------------------------------------------
 
 
@@ -199,7 +199,7 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
 
 # Dicionário de Registradores
 regs = {
-    'zero' : 0,  '0'  :  0,
+    'zero' : 0,'0'  :  0,
     'at' : 1,  '1'  :  1,
     'v0' : 2,  '2'  :  2,
     'v1' : 3,  '3'  :  3,
