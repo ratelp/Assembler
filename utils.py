@@ -82,9 +82,9 @@ def localizaLinhaInstrucao(nomeArquivo, instrucao):
    return listaRetorno
     
 def tradutor(nomeArquivo, posicaoLabels, hexa):
-
-    # Index para se utilizar na manipulação do endereço do formato i
-    indexLabelI = 0
+    # Quantidade de chamadas de bne e beq
+    # É utilizado para saber a linha atual de execução (PC) e calcular o endereço relativo da Label nessas chamadas
+    qt_beq, qt_bne = 0, 0
 
     # Coleta cada linha do arquivo enviado separando pelas linhas em uma lista
     arquivo = open(nomeArquivo)
@@ -142,15 +142,25 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
                 # Para beq e bne foi feito uma função com entitulação 'localizaLinhaInstrucao', com intuito de localizar linha
                 # onde está a instrução e assim poder calcular a diferença da posição atual para posição da label
 
-                case('beq' | 'bne'):
+                case('beq'):
                     i = 0 
                     # selecionando linha em que está a label
                     while listaLimpa[index + 3] != posicaoLabels[i]['label']:
                         i += 1
                     
-                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[0] + 1)),16)
-                    # Atualizando index
-                    indexLabelI += 1
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[qt_beq] + 1)),16)
+                    # Atualizando quantidade de qt_beq
+                    qt_beq += 1
+
+                case('bne'):
+                    i = 0 
+                    # selecionando linha em que está a label
+                    while listaLimpa[index + 3] != posicaoLabels[i]['label']:
+                        i += 1
+                    
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[qt_bne] + 1)),16)
+                    # Atualizando quantidade de qt_bne
+                    qt_bne += 1
 
                 case('addi' | 'addiu' | 'slti' | 'sltiu' | 'andi' | 'ori'):
                     bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 2]],5)  + binario(regs[listaLimpa[index + 1]],5) + binario(int(listaLimpa[index + 3]),16)
