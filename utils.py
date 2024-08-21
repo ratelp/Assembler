@@ -147,7 +147,8 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
                     # selecionando linha em que está a label
                     while listaLimpa[index + 3] != posicaoLabels[i]['label']:
                         i += 1
-                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[indexLabelI] + 1)),16)
+                    
+                    bits = formato_instrucoes[palavra][1] + binario(regs[listaLimpa[index + 1]],5)  + binario(regs[listaLimpa[index + 2]],5) + binario((posicaoLabels[i]['numLinha'] - (localizaLinhaInstrucao(nomeArquivo,palavra)[0] + 1)),16)
                     # Atualizando index
                     indexLabelI += 1
 
