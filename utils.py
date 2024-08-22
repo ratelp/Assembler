@@ -94,8 +94,9 @@ def tradutor(nomeArquivo, posicaoLabels, hexa):
     # Irá retirar os caracteres '#' e o que vier após eles de cada linha do arquivo
     listaLinhas = [linha.split('#')[0].strip() for linha in arquivoLinhas]
 
+
     # Irá separar cada palavra de cada linha em uma lista
-    listaPalavra = [palavra for linha in listaLinhas for palavra in linha.split()]
+    listaPalavra = [palavra for linha in listaLinhas for palavra in linha.replace('(', ' (').split()]
 
     # Gerando nome do novo arquivo
     if hexa:
